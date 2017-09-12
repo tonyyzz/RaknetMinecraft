@@ -136,6 +136,10 @@
       <Project>{e7af01e5-5880-4f8d-b9be-920d1b18d7a1}</Project>
       <Name>Model</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SwigRaknetCS\SwigRaknetCS.csproj">
+      <Project>{ae4f4434-fbed-4f20-b8cc-fe65b6b8c48e}</Project>
+      <Name>SwigRaknetCS</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />

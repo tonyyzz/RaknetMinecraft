@@ -1,8 +1,10 @@
 ﻿using BaseCommon;
+using SwigRaknetCS;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -12,83 +14,92 @@ using System.Windows.Forms;
 
 namespace UdpHouseTest
 {
-	public partial class LoginForm : Form
-	{
-		public LoginForm()
-		{
-			InitializeComponent();
-		}
+    public partial class LoginForm : Form
+    {
+        public LoginForm()
+        {
+            InitializeComponent();
+        }
 
-		private void LoginForm_Load(object sender, EventArgs e)
-		{
-			tbxId.Focus();
-		}
+        private void LoginForm_Load(object sender, EventArgs e)
+        {
+            tbxId.Focus();
 
-		private void btnLogin_Click(object sender, EventArgs e)
-		{
-			var idstr = tbxId.Text.Trim();
-			int id = 0; int.TryParse(idstr, out id);
-			if (id <= 0)
-			{
-				MessageBox.Show("请输入Id");
-				tbxId.Text = "";
-				tbxId.Focus();
-				return;
-			}
+            string errorMsg = "";
+            bool flag = SwigRaknetCSPreInit.JudgeRaknetRun(out errorMsg);
+            if (!flag)
+            {
+                Debug.WriteLine("------------------------" + errorMsg);
+                return;
+            }
+            Debug.WriteLine("--------------------------Raknet测试通过");
+        }
 
-			MngToolInit.Init();
+        private void btnLogin_Click(object sender, EventArgs e)
+        {
+            var idstr = tbxId.Text.Trim();
+            int id = 0; int.TryParse(idstr, out id);
+            if (id <= 0)
+            {
+                MessageBox.Show("请输入Id");
+                tbxId.Text = "";
+                tbxId.Focus();
+                return;
+            }
 
-			TcpClientMng.tcpClient = new TcpClient();
-			TcpClientMng.tcpClient.Start();
-			TcpClientMng.tcpClient.StartClient(TcpClientMng.hall_server_ip, ushort.Parse(TcpClientMng.hall_server_port));
+            MngToolInit.Init();
 
-			Package pack = new Package(MainCommand.MC_ACCOUNT, SecondCommand.SC_ACCOUNT_login);
-			pack.Write(id);
-			TcpClientMng.tcpClient.Send(pack);
+            TcpClientMng.tcpClient = new TcpClient();
+            TcpClientMng.tcpClient.Start();
+            TcpClientMng.tcpClient.StartClient(TcpClientMng.hall_server_ip, ushort.Parse(TcpClientMng.hall_server_port));
 
-			PlayerMng.player.Id = id;
-		}
+            Package pack = new Package(MainCommand.MC_ACCOUNT, SecondCommand.SC_ACCOUNT_login);
+            pack.Write(id);
+            TcpClientMng.tcpClient.Send(pack);
 
-		public void LoginSuccess()
-		{
-			//登录成功
-			CommonForm.Obj.loginForm.Hide();
-			CommonForm.Obj.playerInfoForm = new PlayerInfoForm();
-			CommonForm.Obj.playerInfoForm.Show();
+            PlayerMng.player.Id = id;
+        }
 
-
-			//登录代理服务器
-			UdpAgentClientManager.InitInstance("127.0.0.1", 5558, (player) =>
-			{
-				ThreadPool.QueueUserWorkItem(o =>
-				{
-					while (true)
-					{
-						//将玩家信息上传至udp服务器
-						Package pack = new Package(MainCommand.MC_UDPAGENT, SecondCommand.SC_UDPAGENT_login);
-						pack.Write(PlayerMng.player.Id);
-						UdpAgentClientManager.Instance?.Send(pack);
-						Thread.Sleep(1000);
-					}
-				});
-
-			}, PlayerMng.player);
+        public void LoginSuccess()
+        {
+            //登录成功
+            CommonForm.Obj.loginForm.Hide();
+            CommonForm.Obj.playerInfoForm = new PlayerInfoForm();
+            CommonForm.Obj.playerInfoForm.Show();
 
 
-			ThreadPoolSendMsgQueue.Start();
-		}
+            //登录代理服务器
+            UdpAgentClientManager.InitInstance("127.0.0.1", 5558, (player) =>
+            {
+                ThreadPool.QueueUserWorkItem(o =>
+                {
+                    while (true)
+                    {
+                        //将玩家信息上传至udp服务器
+                        Package pack = new Package(MainCommand.MC_UDPAGENT, SecondCommand.SC_UDPAGENT_login);
+                        pack.Write(PlayerMng.player.Id);
+                        UdpAgentClientManager.Instance?.Send(pack);
+                        Thread.Sleep(1000);
+                    }
+                });
 
-		public void Islogin()
-		{
-			MessageBox.Show("正在登录中，请重试别的账号");
-		}
+            }, PlayerMng.player);
 
-		private void tbxId_KeyDown(object sender, KeyEventArgs e)
-		{
-			if (e.KeyCode == Keys.Enter)
-			{
-				btnLogin.PerformClick();
-			}
-		}
-	}
+
+            ThreadPoolSendMsgQueue.Start();
+        }
+
+        public void Islogin()
+        {
+            MessageBox.Show("正在登录中，请重试别的账号");
+        }
+
+        private void tbxId_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                btnLogin.PerformClick();
+            }
+        }
+    }
 }
