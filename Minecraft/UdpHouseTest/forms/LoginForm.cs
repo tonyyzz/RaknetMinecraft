@@ -71,22 +71,8 @@ namespace UdpHouseTest
             //登录代理服务器
             UdpAgentClientManager.InitInstance("127.0.0.1", 5558, (player) =>
             {
-                ThreadPool.QueueUserWorkItem(o =>
-                {
-                    while (true)
-                    {
-                        //将玩家信息上传至udp服务器
-                        Package pack = new Package(MainCommand.MC_UDPAGENT, SecondCommand.SC_UDPAGENT_login);
-                        pack.Write(PlayerMng.player.Id);
-                        UdpAgentClientManager.Instance?.Send(pack);
-                        Thread.Sleep(1000);
-                    }
-                });
-
+                ThreadPoolUploadPlayerInfoToUdpServer.Start();
             }, PlayerMng.player);
-
-
-            ThreadPoolSendMsgQueue.Start();
         }
 
         public void Islogin()

@@ -16,6 +16,7 @@ namespace UdpHouseTest
     public static class ThreadPoolSendMsgQueue
     {
         private static Queue<MsgSendQueue> queue = new Queue<MsgSendQueue>();
+        private static bool isRunning = true;
 
         public static void Enqueue(MsgSendQueue msgSendQueue)
         {
@@ -47,10 +48,19 @@ namespace UdpHouseTest
         }
 
         /// <summary>
+        /// 停止线程池
+        /// </summary>
+        public static void Stop()
+        {
+            isRunning = false;
+        }
+
+        /// <summary>
         /// 线程池启动
         /// </summary>
         public static void Start()
         {
+            isRunning = true;
             ThreadPool.QueueUserWorkItem(obj =>
             {
                 int timeSp = (int)obj;
@@ -59,6 +69,10 @@ namespace UdpHouseTest
 
                 while (true)
                 {
+                    if (!isRunning)
+                    {
+                        break;
+                    }
                     Debug.WriteLine("---ThreadPoolSendMsgQueue执行");
                     if (queue.Count > 0)
                     {

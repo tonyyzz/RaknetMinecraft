@@ -110,7 +110,9 @@
     <Compile Include="package\udpAgent\UdpAgentTestUdpAgentServerToUdpClientPacket.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="threadPool\ThreadPoolClientSendMsgToServer.cs" />
     <Compile Include="threadPool\ThreadPoolSendMsgQueue.cs" />
+    <Compile Include="threadPool\ThreadPoolUploadPlayerInfoToUdpServer.cs" />
     <Compile Include="udpRaknet\UdpRaknetPeerManager.cs" />
     <Compile Include="udp\UdpAgentClientManager.cs" />
     <Compile Include="udp\UdpClientManager.cs" />
